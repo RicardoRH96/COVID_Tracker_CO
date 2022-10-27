@@ -1,5 +1,4 @@
 #load R packages
-
 library(dplyr)
 library(tidyr)
 library(ggplot2)
@@ -256,8 +255,29 @@ tabPanel(
 tabPanel(
   title = "Most Frequent Variants",
   reactableOutput("lineagetable")
-)
-)
+),
+tabPanel(title = "Origin and Spread of Mu Visualization",
+  HTML("<p style='font-size:25px'>",
+       "<b>Additional resources</b>","</p>"), 
+  column(width = 10, 
+         
+         infoBoxOutput("nextstrain_caption", width = 12),
+         
+         htmlOutput("nextstrain")
+  )#,
+  
+  #column(width = 5, offset = 1,
+         
+         #tags$head(tags$script('!function(d,s,id){var js,fjs=d.getElementsByTagName(s)    [0],p=/^http:/.test(d.location)?\'http\':\'https\';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");'))
+         #,
+         #infoBoxOutput("twitter_caption", width = 10),
+         
+         #box(style='width:600px;overflow-x: scroll;height:800px;overflow-y: scroll;',
+             #a("Follow me on Twitter @Ricardo__JRH", class="twitter-timeline", href = "https://twitter.com/Ricardo__JRH")
+         )
+  )
+
+
 
 themeSelector <- function() {
   div(
@@ -472,7 +492,33 @@ server <- function(input, output, session) {
                                defaultPageSize = 25) %>%
       add_legend(lineage_table, col_name = 'Total', title = 'Number of Sequences', align = 'left', colors = c("#22577A","#38A3A5","#57CC99","#80ED99","#C7F9CC"))
     
-  })  
+  })
+#add nextstrain window here
+  observe({ 
+    
+    test <<- paste0("https://nextstrain.org/groups/IIBTlab/ncov/Mu?c=country") 
+  })
+  
+  output$nextstrain <- renderUI({
+    input$Member
+    my_test <- tags$iframe(src=test, height = 800, width = 1400)
+    print(my_test)
+    my_test
+  })
+  
+  output$nextstrain_caption <- renderInfoBox({
+    
+    nextstrain_txt = "We created a custom Nextstrain page to visualize the origin and global spread of the SARS-CoV-2 Mu VOI. Below shows a phylogenetic tree of a subsampling per week and country of Mu sequences reported worldwide, colored by Country."
+    
+    infoBox(title = HTML("Phylogenetics:"),
+            value = HTML("<p style='font-size:18px; align: center'>",
+                         nextstrain_txt,"</p>"),
+            icon = icon("creative-commons-sampling"),
+            fill = TRUE,
+            width = 4
+    )
+  })
+  
   }
 
 shinyApp(ui, server) 
